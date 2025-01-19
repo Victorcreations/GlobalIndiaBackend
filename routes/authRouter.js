@@ -7,14 +7,13 @@ import genotp from "../middleware/randomOTP.js";
 import sendMail from "../middleware/mailer.js";
 import { check,validationResult } from "express-validator";
 import { checkUserAvailability,checkUser } from "../middleware/userCheck.js";
-import { OTPmodel,userModel } from "../config/Schema.js";
+import { OTPmodel,userModel,dataModel } from "../config/Schema.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import moment from "moment";
 import clearOTP from "../middleware/passwordClear.js";
 import { credEnc,credDec } from "../middleware/passwordSec.js";
-import { routeVerify } from "../middleware/tokenVerify.js";
-import { enc } from "../middleware/test.js";
+import { authUser, routeVerify } from "../middleware/tokenVerify.js";
 
 const authRouter = express.Router();
 
@@ -65,8 +64,6 @@ authRouter.post(
     {
         const OTP = genotp(); 
 
-        const salt = parseInt(process.env.SALT);
-
         try
         {
             const hash = crypto.randomBytes(32).toString('hex');
@@ -114,7 +111,7 @@ authRouter.post(
 
         catch(e)
         {
-            console.log("OTP error => "+e);
+            console.log("OTP error => "+ e);
         }
     }
 })
@@ -175,6 +172,7 @@ authRouter.post("/login",async (req,res) => {
         const secureHash = crypto.randomBytes(32).toString('hex');
 
         req.session.userVerify = secureHash;
+        req.session.dataUser = await credEnc(userName);
 
         const sentOTP = new OTPmodel({otp:otp,proof:secureHash});
 
@@ -196,7 +194,7 @@ authRouter.post("/login",async (req,res) => {
 
 authRouter.post("/userAuth",async (req,res) => {
 
-    const receivedOTP = req.body.otp;
+    const receivedOTP = req.body.logOTP;
 
     const sessionHash = req.session.userVerify;
 
@@ -217,14 +215,50 @@ authRouter.post("/userAuth",async (req,res) => {
 
         if(otp.otp === receivedOTP && difference < 2)
         {
+            req.session.dataUserActual = req.session.dataUser;
+
             res.status(200).json({ mssg : "User authorized" });
+        }
+
+        else
+        {
+            res.status(401).json({ error : "OTP mismatch or time exceeded" });
         }
     }
  
 });
 
+authRouter.post("/subData",
+    [
+        check("ordno").notEmpty().withMessage("Order number is an required field"),
+        check("material").notEmpty().withMessage("The material field cannot be left empty")
+    ]
+    ,async (req,res) => {
+        
+        const order_no = req.body.ordno;
+        const material = req.body.material;
+
+        const user = req.session.dataUserActual;
+
+        const userData = await credDec(user);
+
+        const userId = await userModel.findOne({ userName : userData });
+
+        const product = new dataModel(
+            {
+                ordNo : order_no,
+                product : material
+            }
+        )
+})
+
 authRouter.post("/test",async (req,res) => {
     
+})
+
+authRouter.post("/update-material",async (req,res) => {
+    // console.log(req.body);
+    console.log("Working");
 })
 
 export default authRouter;

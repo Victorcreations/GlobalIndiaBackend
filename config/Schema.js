@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema(
     }
 )
 
+export const userModel = mongoose.model("Users",userSchema,"Users");
+
 const credsSchema = new mongoose.Schema(
     {
         key : { type:String },
@@ -26,6 +28,14 @@ const credsSchema = new mongoose.Schema(
     }
 )
 
+const dataSchema =  new mongoose.Schema(
+    {
+        id : {type:mongoose.Schema.Types.ObjectId,required:true,ref:'userModel'},
+        ordNo : {type:Number,required:true},
+        product:{type:String,required:true}
+    }
+)
+
 export const OTPmodel = mongoose.model("OTP",OTPschema,"OTP");
-export const userModel = mongoose.model("Users",userSchema,"Users");
 export const credsModel = mongoose.model("creds",credsSchema,"creds");
+export const dataModel = mongoose.model("Data",dataSchema,"Data");

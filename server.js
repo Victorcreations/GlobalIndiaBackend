@@ -1,5 +1,5 @@
 import express from "express";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
@@ -7,24 +7,39 @@ import session from "express-session";
 import path from "path";
 import clearOTP from "./middleware/passwordClear.js";
 import { credEnc,credDec } from "./middleware/passwordSec.js";
-import { routeVerify } from "./middleware/tokenVerify.js";
+import { routeVerify,authUser } from "./middleware/tokenVerify.js";
 import authRouter from "./routes/authRouter.js";
+import MongoStore from "connect-mongo";
 
 dotenv.config();
 const app = express();
 const __dirname = path.resolve(); // Get the current directory
-app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine","ejs");
 app.set("views","./views");
+app.use(express.json());
 app.use(cookieParser(process.env.SECRET));
+app.use(express.static(path.join(__dirname, 'global-react/build'),{
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (filePath.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}
+));
 
 app.use(session(
     {
         secret:process.env.SECRET,
         resave:false,
-        saveUninitialized:true,
-
+        saveUninitialized:false,
+        store : MongoStore.create(
+            {
+                mongoUrl : process.env.SESSION_URL
+            }
+        ),
         cookie : {
             maxAge:1000*60*60*60
         }
@@ -40,12 +55,28 @@ mongoose.connect(process.env.DB_URL)
 )
 .catch(e => {console.log(e)});
 
-app.get("/index",(req,res) => {
-    res.render("index");
-})
-
-app.get("/login",routeVerify,(req,res) => {
-    res.render("login");
-})
-
 app.use("/api",authRouter)
+
+app.get("*",(req,res) => {
+    res.sendFile(path.join(__dirname,"global-react","build","index.html"));
+})
+
+// app.get("/index",(req,res) => {
+//     res.render("index");
+// })
+
+// app.get("/otp",(req,res) => {
+//     res.render("otp");
+// })
+
+// app.get("/login",(req,res) => {
+//     res.render("login");
+// })
+
+// app.get("/logotp",(req,res) => {
+//     res.render("loginOTP");
+// })
+
+// app.get("/prod",authUser,(req,res) => {
+//     res.render("prod");
+// })

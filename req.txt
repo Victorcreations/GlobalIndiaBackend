@@ -4,3 +4,4 @@ data -> per individual
 admin -> all data
 User acc created by 4 people
 page -> report
+Buyer Name

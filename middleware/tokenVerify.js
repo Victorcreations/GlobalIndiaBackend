@@ -5,19 +5,7 @@ import cookieParser from "cookie-parser";
 export const routeVerify = async (req,res,next) => {
 
     const token = req.cookies.token;
-
-    // try
-    // {
-    //     token = req.cookies.token;
-    // }
-
-    // catch(e)
-    // {
-    //     console.log("Token error in tokenVerify.js => " + e);
-    //     res.status(401).json({ error : "Cannot retrieve token" });
-    // }
     
-
     if(!token)
     {
         res.status(401).json({ error : "No token found" })
@@ -37,3 +25,18 @@ export const routeVerify = async (req,res,next) => {
         }
     }
 } 
+
+export const authUser = async(req,res,next) => {
+
+    const userCreds = req.session.dataUserActual;
+
+    if(!userCreds)
+    {
+        res.status(401).json({ error : "User is not authorized" });
+    }
+
+    else
+    {
+        next();
+    }
+}

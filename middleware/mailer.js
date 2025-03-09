@@ -31,13 +31,18 @@ async function sendMail(data,mailId)
         await transport.sendMail(information,(err,mail) => {
 
             if(err)
+            {
                 status = err;
+                console.log("Mailer error  => " + err);
+            }
+                
         })
     }
 
     catch(e)
     {
         status = e;
+        console.log(e);
     }
 
     return status;

@@ -10,6 +10,7 @@ import { credEnc,credDec } from "./middleware/passwordSec.js";
 import { routeVerify,authUser } from "./middleware/tokenVerify.js";
 import authRouter from "./routes/authRouter.js";
 import MongoStore from "connect-mongo";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,11 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine","ejs");
 app.set("views","./views");
 app.use(express.json());
+
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://192.168.29.21:3000"
+]
 app.use(cookieParser(process.env.SECRET));
 app.use(express.static(path.join(__dirname, 'global-react/build'),{
     setHeaders: (res, filePath) => {
@@ -34,7 +40,7 @@ app.use(session(
     {
         secret:process.env.SECRET,
         resave:false,
-        saveUninitialized:false,
+        saveUninitialized:true,
         store : MongoStore.create(
             {
                 mongoUrl : process.env.SESSION_URL
@@ -45,12 +51,16 @@ app.use(session(
         }
     }
 ))
+app.use(cors({
+    origin : allowedOrigins,
+    credentials : true
+}));
 
 
 mongoose.connect(process.env.DB_URL)
 .then(
     app.listen(process.env.PORT,async () => {
-        console.log(`Listening on port ${process.env.PORT}`)
+        console.log(`Listening on http://localhost:${process.env.PORT}`)
     })
 )
 .catch(e => {console.log(e)});
@@ -61,9 +71,9 @@ app.get("*",(req,res) => {
     res.sendFile(path.join(__dirname,"global-react","build","index.html"));
 })
 
-// app.get("/index",(req,res) => {
-//     res.render("index");
-// })
+app.get("/index",(req,res) => {
+    res.render("index");
+})
 
 // app.get("/otp",(req,res) => {
 //     res.render("otp");

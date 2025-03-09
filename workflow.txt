@@ -1,0 +1,4 @@
+User registers -> mail sent to admin -> admin verifies -> OTP says the otp to the user -> user enters the otp -> User registered
+Now user logs in -> enters username and password -> otp sent to mail -> dashboard
+1.Admin 
+2.Worker or User

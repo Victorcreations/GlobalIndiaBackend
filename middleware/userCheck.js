@@ -29,13 +29,13 @@ export async function checkUserAvailability(userName,Email)
     return result;
 }
 
-export async function checkUser(userName,Password)
+export async function checkUser(Email,Password)
 {
     const result = [];
 
     try
     {
-        const user = await userModel.findOne({ userName:userName });
+        const user = await userModel.findOne({ Email : Email });
         
         if(!user)
         {
@@ -54,7 +54,6 @@ export async function checkUser(userName,Password)
 
     catch(e)
     {
-        console.log("In catch")
         result[0] = { error : "Some error in checking the user" };
     }
 

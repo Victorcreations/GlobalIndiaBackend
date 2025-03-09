@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema(
         userName : { type:String,required:true },
         password : { type:String,required:true },
         Email : { type:String,required:true,unique:true },
+        role : {type:String,required:true},
         pubId: { type:String,default:uuidv4 }
     }
 )
@@ -36,6 +37,66 @@ const dataSchema =  new mongoose.Schema(
     }
 )
 
+const MaterialInquirySchema = new mongoose.Schema(
+    {
+        Suppliermaterial : {type:String,required:true},
+        OrderNumber : {type:String,required:true},
+        status : {type:String,default:"Pending"},
+        explaination : {type:String,required :true},
+        createdTime : {type:Date,default:Date.now},
+        updateTime : {type:Date,default:Date.now},
+        user : {type:String,required:true}
+    }
+)
+
+const testSchema = new mongoose.Schema(
+    {
+        name:{type:String,required:true},
+        password: {type:String,required:true}
+    }
+)
+
+const supplierSchema = new mongoose.Schema(
+    {
+        customerNumber : {type:String,required:true},
+        Customer : {type:String,required:true},
+        SecondOrderClassification : {type:String,required:true},
+        Status : {type:String,required:true},
+        DocumentStatus : {type:String,required:true},
+        AbnormalInfo : {type:String,required:true},
+        Invite : {type:String,required:true},
+        ReAuthPerson : {type:String,required:true},
+        ContactInfo : {type:String,required:true},
+        InvitationDate : {type:Date,required:Date.now},
+        buyer : {type:String,required:true},
+        user : {type:String,required:true}
+    }
+)
+
+const customerSchema = new mongoose.Schema(
+    {
+        user : {type:String,required:true},
+        id : {type:Number,required:true},
+        customer : {type:String,required:true},
+        platformNo: {type:String,required:true},
+        poNo: {type:String,required:true},
+        purchaseDate: {type:String,required:true},
+        orderAmount: {type:String,required:true},
+        currency: {type:String,required:true},
+        purchasingDepartment: {type:String,required:true},
+        purchaser: {type:String,required:true},
+        requisitionBusinessGroup: {type:String,required:true},
+        deliveryStatus: {type:String,required:true},
+        orderStatus: {type:String,required:true},
+        acceptanceStatus:{type:String,required:true},
+        statementStatus: {type:String,required:true},
+    }
+)
+
 export const OTPmodel = mongoose.model("OTP",OTPschema,"OTP");
 export const credsModel = mongoose.model("creds",credsSchema,"creds");
 export const dataModel = mongoose.model("Data",dataSchema,"Data");
+export const MaterialInquiryModel = mongoose.model("MaterialInquiry",MaterialInquirySchema,"MaterialInquiry");
+export const testModel = mongoose.model("testData",testSchema,"testData");
+export const SupplierModel = mongoose.model("SupplierInformation",supplierSchema,"SupplierInformation");
+export const customerModel = mongoose.model("CustomerOrderInformation",customerSchema,"CustomerOrderInformation");

@@ -1,0 +1,6 @@
+sign up ( code sent to admin ( if code correct only then user created ) )
+login -> code( sent to particular individual )
+data -> per individual
+admin -> all data
+User acc created by 4 people
+page -> report

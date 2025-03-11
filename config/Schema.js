@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SiTheboringcompany } from "react-icons/si";
 import { v4 as uuidv4 } from "uuid";
 
 const OTPschema = new mongoose.Schema(
@@ -76,7 +77,6 @@ const supplierSchema = new mongoose.Schema(
 const customerSchema = new mongoose.Schema(
     {
         user : {type:String,required:true},
-        id : {type:Number,required:true},
         customer : {type:String,required:true},
         platformNo: {type:String,required:true},
         poNo: {type:String,required:true},
@@ -93,6 +93,55 @@ const customerSchema = new mongoose.Schema(
     }
 )
 
+const customerDeliverySchema = new mongoose.Schema(
+    {
+        user:{type:String,required:true},
+        OrderNumber:{type:String,required:true},
+        MaterialCategory:{type:String,required:true},
+        Vendor:{type:String,required:true},
+        Invitee:{type:String,required:true},
+        Host:{type:String,required:true},
+        Sender:{type:String,required:true},	
+        Status:{type:String,required:true},
+        SupplementTemplate:{type:String,required:true}, 	
+        Created:{type:String,required:true},
+        Actions:{type:String,required:true} 
+    }
+)
+
+const materialReplenishmentSchema = new mongoose.Schema(
+    {
+        user:{type:String,required:true},
+        OrderNumber:{type:String,required:true},
+        MaterialCategory:{type:String,required:true},
+        Vendor:{type:String,required:true},
+        Invitee:{type:String,required:true},
+        Host:{type:String,required:true},
+        Sender:{type:String,required:true},	
+        Status:{type:String,required:true},
+        SupplementTemplate:{type:String,required:true}, 	
+        Created:{type:Date,required:true},
+        updated : {type:Date,required:true},
+    }
+)
+
+const dailWorkSchema = new mongoose.Schema(
+    {
+        user:{type:String,required:true},
+        CompanyName:{type:String,required:true},
+        ProjectName:{type:String,required:true},
+        SupervisorName:{type:String,required:true},
+        ManagerName:{type:String,required:true},
+        PrepaidBy:{type:String,required:true},
+        Employee:{type:String,required:true},
+        NatureofWork:{type:String,required:true},
+        Progress:{type:String,required:true},
+        HourofWork:{type:String,required:true},
+        Charges:{type:String,required:true},
+        Date:{type:Date,required:true}
+    }
+)
+
 export const OTPmodel = mongoose.model("OTP",OTPschema,"OTP");
 export const credsModel = mongoose.model("creds",credsSchema,"creds");
 export const dataModel = mongoose.model("Data",dataSchema,"Data");
@@ -100,3 +149,6 @@ export const MaterialInquiryModel = mongoose.model("MaterialInquiry",MaterialInq
 export const testModel = mongoose.model("testData",testSchema,"testData");
 export const SupplierModel = mongoose.model("SupplierInformation",supplierSchema,"SupplierInformation");
 export const customerModel = mongoose.model("CustomerOrderInformation",customerSchema,"CustomerOrderInformation");
+export const customerDeliveryModel = mongoose.model("CustomerDelivery",customerDeliverySchema,"CustomerDelivery");
+export const materialReplenishmentModel = mongoose.model("MaterialReplenishment",materialReplenishmentSchema,"MaterialReplenishment");
+export const dailyWorkModel = mongoose.model("DailyWorks",dailWorkSchema,"DailyWork");

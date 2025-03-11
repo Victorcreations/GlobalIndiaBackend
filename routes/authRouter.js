@@ -14,7 +14,10 @@ import {
         MaterialInquiryModel,
         testModel,
         SupplierModel,
-        customerModel
+        customerModel,
+        customerDeliveryModel,
+        materialReplenishmentModel,
+        dailyWorkModel
     } from "../config/Schema.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -173,30 +176,6 @@ authRouter.post("/userAuth", async (req, res) => {
 
 });
 
-authRouter.post("/subData",
-    [
-        check("ordno").notEmpty().withMessage("Order number is an required field"),
-        check("material").notEmpty().withMessage("The material field cannot be left empty")
-    ]
-    , async (req, res) => {
-
-        const order_no = req.body.ordno;
-        const material = req.body.material;
-
-        const user = req.session.dataUserActual;
-
-        const userData = await credDec(user);
-
-        const userId = await userModel.findOne({ userName: userData });
-
-        const product = new dataModel(
-            {
-                ordNo: order_no,
-                product: material
-            }
-        )
-    })
-
 authRouter.post("/test", async (req, res) => {
     console.log("Nothing");
 })
@@ -314,29 +293,26 @@ authRouter.post("/suppliers/get-data",async(req,res) => {
 })
 
 authRouter.post("/customer/add-data",async(req,res) => {
-    
- 
-    const id = req.body.id;
-    const customer = req.body.customer;
-    const platformNo = req.body.platformNo;
-    const poNo = req.body.poNo;
-    const purchaseDate = req.body.purchaseDate;
-    const orderAmount = req.body.orderAmount;
-    const currency = req.body.currency;
-    const purchasingDepartment = req.body.purchasingDepartment;
-    const purchaser = req.body.purchaser;
-    const requisitionBusinessGroup = req.body.requisitionBusinessGroup
-    const deliveryStatus = req.body.deliveryStatus;
-    const orderStatus = req.body.orderStatus;
-    const acceptanceStatus = req.body.acceptanceStatus;
-    const statementStatus = req.body.statementStatus;
-    const user = req.body.userName;
+
+    const customer = req.body[0].customer;
+    const platformNo = req.body[0].platformNo;
+    const poNo = req.body[0].poNo;
+    const purchaseDate = req.body[0].purchaseDate;
+    const orderAmount = req.body[0].orderAmount;
+    const currency = req.body[0].currency;
+    const purchasingDepartment = req.body[0].purchasingDepartment;
+    const purchaser = req.body[0].purchaser;
+    const requisitionBusinessGroup = req.body[0].requisitionBusinessGroup
+    const deliveryStatus = req.body[0].deliveryStatus;
+    const orderStatus = req.body[0].orderStatus;
+    const acceptanceStatus = req.body[0].acceptanceStatus;
+    const statementStatus = req.body[0].statementStatus;
+    const user = req.body[1].user;
 
     try
     {
         const userData = new customerModel(
             {
-                id: id,
                 customer: customer,
                 platformNo: platformNo,
                 poNo: poNo,
@@ -366,7 +342,7 @@ authRouter.post("/customer/add-data",async(req,res) => {
 
 authRouter.post("/customer/get-data",async(req,res) => {
 
-    const user = req.body.username;
+    const user = req.body.email;
     
     try
     {
@@ -380,128 +356,181 @@ authRouter.post("/customer/get-data",async(req,res) => {
     }
 })
 
-
-authRouter.post("/test/createData", async(req,res) => {
-    const name = req.body.name;
-    const password = req.body.password;
+authRouter.post("/customerdelivery/add-data",async(req,res) => {
+    
+    const orderNumber = req.body[0].orderNumber;
+    const materialCategory = req.body[0].materialCategory;
+    const vendor = req.body[0].vendor;
+    const invitee = req.body[0].invitee;
+    const hostInviterContactInfo = req.body[0].hostInviterContactInfo;
+    const sender = req.body[0].sender;
+    const status = req.body[0].status;
+    const supplementTemplate = req.body[0].supplementTemplate;
+    const isMonitored = req.body[0].isMonitored;
+    const user = req.body[1].user;
 
     try
     {
-        const data = new testModel(
+        const newData = new customerDeliveryModel(
             {
-                name:name,
-                password:password
+                user:user,
+                OrderNumber : orderNumber,
+                MaterialCategory : materialCategory,
+                Vendor : vendor,
+                Invitee : invitee,
+                Host : hostInviterContactInfo,
+                Sender : sender,
+                Status : status,
+                SupplementTemplate : supplementTemplate,
+                Actions : isMonitored
             }
         )
-    
-        const response = await data.save();
 
-        res.status(200).json({"mssg":"Success"});
+        await newData.save();
+
+        res.status(200).json({"mssg" : "data saved"});
     }
-
-    catch(e)
+    catch(err)
     {
-        res.status(500).json({"error" : e});
+        res.status(500).json({"error" : err});
     }
 })
 
-authRouter.get("/test/getData",async (req,res) => {
+authRouter.post("/customerdelivery/get-data",async(req,res) => {
 
+    const user = req.body.email;
+    
     try
     {
-        const data = await testModel.find({},{_id:0,__v:0});
+        const data = await customerDeliveryModel.find({user : user});
 
         res.status(200).json(data);
     }
-
-    catch(e)
-    {
-        res.status(500).json({"error" : "Unable to get data"});
-    }
-})
-
-authRouter.post("/test/registerUser", async(req,res) => {
-    const name = req.body.name;
-    const password = req.body.password;
-    const mail = req.body.mail;
-
-    try{
-        const newUser = new userModel(
-            {
-                userName : name,
-                password : password,
-                Email : mail
-            }
-        )
-
-        await newUser.save();
-
-        return res.status(200).json({"mssg" : "Success"})
-    }
     catch(err)
     {
-        return res.status(402).json({"error" : err});
+        res.status(500).json({"Error" : "There was some problem in fetching the data"});
     }
 })
 
-authRouter.post("/test/login",async(req,res) => {
-    const name = req.body.name;
-    const password = req.body.password;
+authRouter.post("/material-replenishment/add-data",async(req,res) => {
 
-    const userData = await userModel.findOne({ userName : name });
-
-    if(!userData)
-    {
-        res.status(400).json({"error" : "No User found"})
-    }
-
-    if(userData.password != password)
-    {
-        res.status(403).json({"error" : "Password not match"})
-    }
-    else
-    {
-        const token = jwt.sign(
-            {name},
-            process.env.TOKEN,
-            {
-                expiresIn:'1m'
-            }
-        )
-
-        res.cookie(
-            "token",
-            token,
-            {
-                sameSite: 'Strict',
-                maxAge: 1000 * 60
-            }
-        )
-        
-        res.status(200).json({"mssg" : "User logged in"});
-    }
-})
-
-authRouter.post("/test/isAuth",async(req,res) => {
-    const token = req.cookies.token;
+    const orderNumber = req.body[0].orderNumber;
+    const materialCategory = req.body[0].materialCategory;
+    const vendor = req.body[0].vendor;
+    const invitee = req.body[0].invitee;
+    const hostInviterContactInfo = req.body[0].hostInviterContactInfo;
+    const sender = req.body[0].sender;
+    const status = req.body[0].status;
+    const supplementTemplate = req.body[0].supplementTemplate;
+    const createTime = req.body[0].createTime;
+    const updateTime = req.body[0].updateTime;
+    const user = req.body[1].user;
 
     try
     {
-        const checkToken = jwt.verify(token,process.env.TOKEN);
+        const data = new materialReplenishmentModel(
+            {
+                user:user,
+                OrderNumber : orderNumber,
+                MaterialCategory : materialCategory,
+                Vendor : vendor,
+                Invitee : invitee,
+                Host : hostInviterContactInfo,
+                Sender : sender,
+                Status : status,
+                SupplementTemplate : supplementTemplate,
+                Created : createTime,
+                updated : updateTime
+            }
+        )
 
-        if(checkToken)
-        {
-            res.status(200).json({"message" : "Token valid"});
-        }
-        else
-        {
-            res.status(403).json({"message" : "Token invalid"});
-        }
+        await data.save();
+
+        res.status(200).json({"message" : "Data saved"});
     }
     catch(err)
     {
-        res.status(403).json({"error" : err});
+        console.log(err);
+        res.status(500).json({"error" : err});
     }
-}) 
+})
+
+authRouter.post("/material-replenishment/get-data",async(req,res) => {
+
+    const user = req.body.email;
+    
+    try
+    {
+        const data = await materialReplenishmentModel.find({user : user});
+
+        res.status(200).json(data);
+    }
+    catch(err)
+    {
+        res.status(500).json({"Error" : "There was some problem in fetching the data"});
+    }
+})
+
+authRouter.post("/dailywork/add-data",async(req,res) => {
+
+    console.log(req.body);
+    const companyName = req.body[0].companyName;
+    const projectName = req.body[0].projectName;
+    const superVisorName = req.body[0].supervisorName;
+    const managerName = req.body[0].managerName;
+    const prepaidBy = req.body[0].prepaidBy;
+    const employees = req.body[0].employees;
+    const workTypes = req.body[0].workType;
+    const progress = req.body[0].progress;
+    const hours = req.body[0].hours;
+    const charges = req.body[0].charges;
+    const date = req.body[0].date;
+    const user = req.body[1].user;
+
+    try
+    {
+        const data = new dailyWorkModel(
+            {
+                user : user,
+                CompanyName : companyName,
+                ProjectName : projectName,
+                SupervisorName : superVisorName,
+                ManagerName : managerName,
+                PrepaidBy : prepaidBy,
+                Employee : employees,
+                NatureofWork : workTypes,
+                Progress : progress,
+                HourofWork : hours,
+                Charges : charges,
+                Date : date
+            }
+        )
+
+        await data.save();
+
+        res.status(200).json({"message" : "Data saved successfully"});
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({"error" : err})
+    }
+})
+
+authRouter.post("/dailywork/get-data",async(req,res) => {
+
+    const user = req.body.email;
+    
+    try
+    {
+        const data = await dailyWorkModel.find({user : user});
+
+        res.status(200).json(data);
+    }
+    catch(err)
+    {
+        res.status(500).json({"Error" : "There was some problem in fetching the data"});
+    }
+})
 
 export default authRouter;

@@ -66,27 +66,3 @@ mongoose.connect(process.env.DB_URL)
 .catch(e => {console.log(e)});
 
 app.use("/api",authRouter)
-
-app.get("*",(req,res) => {
-    res.sendFile(path.join(__dirname,"global-react","build","index.html"));
-})
-
-app.get("/index",(req,res) => {
-    res.render("index");
-})
-
-// app.get("/otp",(req,res) => {
-//     res.render("otp");
-// })
-
-// app.get("/login",(req,res) => {
-//     res.render("login");
-// })
-
-// app.get("/logotp",(req,res) => {
-//     res.render("loginOTP");
-// })
-
-// app.get("/prod",authUser,(req,res) => {
-//     res.render("prod");
-// })

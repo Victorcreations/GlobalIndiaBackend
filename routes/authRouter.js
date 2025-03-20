@@ -231,6 +231,19 @@ authRouter.post("/material-inquiry/get-data",async(req,res) => {
     }
 })
 
+authRouter.get("/material-inquiry/get-all",async(req,res) => {
+    try
+    {
+        const data = await MaterialInquiryModel.find();
+
+        res.status(200).json({"data" : data});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
+    }
+})
+
 authRouter.post("/supplier/add-material",async(req,res) =>{
 
     const customerNumber = req.body[0].customerNumber;
@@ -289,6 +302,20 @@ authRouter.post("/suppliers/get-data",async(req,res) => {
     catch(err)
     {
         res.status(500).json({error : err});
+    }
+})
+
+authRouter.get("/suppliers/get-all",async(req,res) => {
+    
+    try
+    {
+        const data = await SupplierModel.find();
+
+        res.status(200).json({"data" : data});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
     }
 })
 
@@ -356,6 +383,18 @@ authRouter.post("/customer/get-data",async(req,res) => {
     }
 })
 
+authRouter.get("/customer/get-all",async(req,res) => {
+    try{
+        const data = await customerModel.find();
+
+        res.status(200).json({"data" : data});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
+    }
+})
+
 authRouter.post("/customerdelivery/add-data",async(req,res) => {
     
     const orderNumber = req.body[0].orderNumber;
@@ -409,6 +448,18 @@ authRouter.post("/customerdelivery/get-data",async(req,res) => {
     catch(err)
     {
         res.status(500).json({"Error" : "There was some problem in fetching the data"});
+    }
+})
+
+authRouter.get("/customerdelivery/get-all",async(req,res) => {
+    try{
+        const data = await customerDeliveryModel.find();
+
+        res.status(200).json({"data" : data});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
     }
 })
 
@@ -471,6 +522,18 @@ authRouter.post("/material-replenishment/get-data",async(req,res) => {
     }
 })
 
+authRouter.get("/material-replenishment/get-all",async(req,res) => {
+    try{
+        const data = await materialReplenishmentModel.find();
+
+        res.status(200).json({"data" : data});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
+    }
+})
+
 authRouter.post("/dailywork/add-data",async(req,res) => {
 
     console.log(req.body);
@@ -530,6 +593,18 @@ authRouter.post("/dailywork/get-data",async(req,res) => {
     catch(err)
     {
         res.status(500).json({"Error" : "There was some problem in fetching the data"});
+    }
+})
+
+authRouter.get("/dailywork/get-all",async(req,res) => {
+    try{
+        const data = await dailyWorkModel.find();
+
+        res.status(200).json({"data" : data});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
     }
 })
 

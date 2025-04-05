@@ -120,6 +120,45 @@ authRouter.post("/registerUser", async (req, res) => {
     clearOTP();
 })
 
+authRouter.post("/super-register",async(req,res) =>{
+
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const role = req.body.role;
+    const salt = parseInt(process.env.SALT);
+
+    try
+    {
+        if(!name || !email || !password || !role){
+            return res.status(406).json({"error" : "Data missing"});
+        }
+
+        const userExists = await userModel.findOne({Email : email});
+
+        if(userExists){
+            return res.status(409).json({"error" : "User already exists"});
+        }
+
+        const passwdHash = await bcrypt.hash(password, salt);
+
+        const newUser = new userModel({
+            userName : name,
+            Email : email,
+            password : passwdHash,
+            role : role
+        })
+
+        await newUser.save();
+
+        res.status(200).json({"success" : "New user created"});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : "Failed to create user"});
+    }
+})
+
 authRouter.post("/login", async (req, res) => {
 
     const Email = req.body.email;
@@ -178,8 +217,6 @@ authRouter.post("/get-clients",async(req,res) => {
     try
     {
         const users = await userModel.find({role : "client"});
-
-        console.log(users);
 
         res.status(200).json({"users" : users});
     }

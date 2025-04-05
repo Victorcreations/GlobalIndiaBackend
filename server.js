@@ -16,8 +16,6 @@ dotenv.config();
 const app = express();
 const __dirname = path.resolve(); // Get the current directory
 app.use(bodyParser.urlencoded({extended:true}));
-app.set("view engine","ejs");
-app.set("views","./views");
 app.use(express.json());
 
 const allowedOrigins = [
@@ -25,16 +23,6 @@ const allowedOrigins = [
     "http://192.168.29.21:3000"
 ]
 app.use(cookieParser(process.env.SECRET));
-app.use(express.static(path.join(__dirname, 'global-react/build'),{
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.js')) {
-            res.setHeader('Content-Type', 'application/javascript');
-        } else if (filePath.endsWith('.css')) {
-            res.setHeader('Content-Type', 'text/css');
-        }
-    }
-}
-));
 
 app.use(session(
     {

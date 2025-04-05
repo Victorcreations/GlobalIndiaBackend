@@ -17,7 +17,10 @@ const userSchema = new mongoose.Schema(
         password : { type:String,required:true },
         Email : { type:String,required:true,unique:true },
         role : {type:String,required:true},
-        pubId: { type:String,default:uuidv4 }
+        pubId: { type:String,default:uuidv4 },
+        info : {type:String},
+        mobile : {type:String},
+        location : {type:String},
     }
 )
 

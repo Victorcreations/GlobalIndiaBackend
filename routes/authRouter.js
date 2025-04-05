@@ -42,12 +42,15 @@ authRouter.post("/sendotp", async (req, res) => {
 
                 const OTPsave = new OTPmodel({ otp: OTP, proof: hash });
                 await OTPsave.save();
-                req.session.secret = hash;
 
                 try
                 {
                     sendMail(OTP, "gokulworkid@gmail.com");
-                    res.status(200).json({ mssg : `OTP has been sent to admin` });
+                    res.status(200).json(
+                        { 
+                            mssg : `OTP has been sent to admin`,
+                            secret : hash 
+                        });
                 }
                 catch(err)
                 {
@@ -57,25 +60,47 @@ authRouter.post("/sendotp", async (req, res) => {
             catch (e) {
                 console.log("OTP error => " + e);
             }
-    })
+    });
+
+authRouter.post("/check-user",async(req,res) => {
+
+    const email = req.body.email;
+
+    try
+    {
+        const response = await userModel.findOne({Email : email});
+
+        if(!response)
+        {
+            res.status(200).json({"Success" : "User not found"});
+        }
+        else
+        {
+            res.status(406).json({"error" : "User already exists"});
+        }
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : "Internal server error"});
+    }
+})
 
 authRouter.post("/registerUser", async (req, res) => {
 
-    const OTP = req.body.otp;
+    const OTP = req.body.newUser.otp;
+    const secret = req.body.newUser.secret;
 
-    if (!req.session.secret) {
-        console.log("No session found");
+    if (!secret || !OTP) {
         res.status(401).json({ error: "Not authorized" })
     }
 
     else {
-        const secret = req.session.secret;
         const salt = parseInt(process.env.SALT);
 
-        const userName = req.body.name;
-        const passwd = req.body.password;
-        const mail = req.body.email;
-        const role = req.body.role;
+        const userName = req.body.newUser.name;
+        const passwd = req.body.newUser.password;
+        const mail = req.body.newUser.email;
+        const role = req.body.newUser.role;
 
         const db_otp = await OTPmodel.findOne({ proof: secret });
 
@@ -99,6 +124,7 @@ authRouter.post("/login", async (req, res) => {
 
     const Email = req.body.email;
     const passwd = req.body.password;
+
 
     const result = await checkUser(Email, passwd);
 
@@ -125,6 +151,9 @@ authRouter.post("/login", async (req, res) => {
                 displayName : creds.userName,
                 displayMail : creds.Email,
                 role : creds.role,
+                mobile : creds.mobile,
+                location : creds.location,
+                bio : creds.info,
                 isAuthenticated : true
             })
 
@@ -142,6 +171,22 @@ authRouter.post("/login", async (req, res) => {
         res.status(403).json({ error: mssg });
     }
 
+})
+
+authRouter.post("/get-clients",async(req,res) => {
+
+    try
+    {
+        const users = await userModel.find({role : "client"});
+
+        console.log(users);
+
+        res.status(200).json({"users" : users});
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
+    }
 })
 
 authRouter.post("/userAuth", async (req, res) => {
@@ -461,6 +506,42 @@ authRouter.get("/customerdelivery/get-all",async(req,res) => {
     {
         res.status(500).json({"error" : err});
     }
+})
+
+authRouter.post("/edit-user",async(req,res) => {
+
+    const email = req.body.data.email;
+    const name = req.body.data.fullName;
+    const mobile = req.body.data.mobile;
+    const location = req.body.data.location;
+    const bio = req.body.data.bio;
+
+    try
+    {
+        const userExists = await userModel.findOne({Email : req.body.data.email});
+
+        if(userExists)
+        {
+            await userModel.updateOne({Email : email},
+                {
+                    $set : {
+                        userName : name,
+                        mobile : mobile,
+                        location : location,
+                        info : bio
+                    }
+                }
+            )
+
+            res.status(200).json({"success" : "Data updated"});
+        }
+    }
+    catch(err)
+    {
+        res.status(500).json({"error" : err});
+    }
+
+
 })
 
 authRouter.post("/material-replenishment/add-data",async(req,res) => {
